@@ -17,4 +17,4 @@ after_success: |
   cd docker-containerviewer
   chmod +x docker-viewer.sh
   ./docker-viewer.sh
-  xdotool getactivewindow key ctrl+c
+  xdotool key ctrl+c
