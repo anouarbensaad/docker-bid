@@ -99,7 +99,14 @@ fi
 function get_containers() {
     ELT="$(echo "${CONTAINER_UNCOL[$CURRENT_POS-1]}")"
     CONTAINER_HASH=${ELT:0:7}
-    INSPECT_DOCKER="docker container inspect $CONTAINER_HASH 
+    INSPECT_DOCKER="docker container inspect $CONTAINER_HASH"
+#                    --format \"table IpAdress   : {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}\n\
+#                               MacAdress  : {{range .NetworkSettings.Networks}}{{.MacAddress}}{{end}} \n    \
+#                               PathLog    : {{.LogPath}}\n                                                  \
+#                               ImageName  : {{.Config.Image}} \n                                            \
+#                               StartedAt  : {{.State.StartedAt}}\n                                          \
+#                               FinishedAt : {{.State.FinishedAt}}\n                                         \
+#                               Status     : {{.State.Status}}\" "
     CONTAINER=$(eval ${INSPECT_DOCKER} 2>/dev/null)
     tmp_diff="$(echo "$CONTAINER" | $SED_CMD)"
     off=$(echo "$tmp_diff" | grep -c ".\{$CN\}")
