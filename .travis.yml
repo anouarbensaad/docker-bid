@@ -1,5 +1,8 @@
 language: generic
 
+os:
+- linux
+
 sudo: required
 
 addons:
