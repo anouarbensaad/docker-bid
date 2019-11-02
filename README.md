@@ -1,5 +1,5 @@
 # docker-statusview
-docker-statusview - is a simple tool that allows you to easily interact with your containers.
+docker-containerviewer - is a simple tool that allows you to easily interact with your containers.
 
 
-![docker-viewered](https://user-images.githubusercontent.com/23563528/68063645-01540400-fd13-11e9-96df-7dff11e89a9d.gif)
+![new release function](https://user-images.githubusercontent.com/23563528/68077085-0c17a300-fdbe-11e9-8a81-638ad69663d5.gif)
