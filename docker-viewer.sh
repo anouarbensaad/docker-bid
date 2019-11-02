@@ -10,13 +10,16 @@ RED=`echo -e '\033[1;31m'`
 GREEN=`echo -e '\033[1;32m'`
 YELLOW=`echo -e '\033[1;33m'`
 NORMAL=`echo -e '\033[0m'`
+WHITEBOLD_RE=`echo -e '\033[1m'`
 WHITE_BOLD="\033[1m"
 OFF="\033[0m"
 
 # setkeys.
 ArrowUp="`echo -e '\e[A'`" 
 ArrowDown="`echo -e '\e[B'`" 
+#escape | echape
 ec="`echo -e '\e'`"
+#entré
 nl="`echo -e '\n'`"
 ArrowUp_1="k"
 ArrowDown_1="j"
@@ -26,6 +29,7 @@ nl_1="e"
 function tputcolors() {
     NORMAL=$(tput sgr0)
     REVERSE=$(tput rev)
+    BLUE=$(tput setaf 6)
 } 
 
 function untputcolors() {
@@ -51,10 +55,22 @@ if [[ -t 1 ]] && which tput &>/dev/null && tput colors &>/dev/null; then
 else
     untputcolors
 fi
+DOCKER_LINES=$(docker container list -a|wc -l)
+DOCKER_LIST_VIEW=$(($DOCKER_LINES - 1))
 
 # docker view template.
 DOCKER_SET="docker container list -a \
-            --format \"table {{.ID}}   -   {{.Image}}\t({{.RunningFor}})\t<{{.Names}}>\t{{.Ports}}\t{{.Status}}\""
+            --format \"table STATUSCOLOR {{.ID}}OFFCOLOR − {{.Image}}\tBOLDCOLOR({{.RunningFor}})OFFCOLOR\t{{.Status}}\tEXPOSECOLOR{{.Ports}}OFFCOLOR\tBOLDCOLOR<{{.Names}}>OFFCOLOR\" |\
+            tail -$DOCKER_LIST_VIEW |\
+            sed -e \"s/OFFCOLOR/$NORMAL/g\" \
+            -e \"/Exited/s/STATUSCOLOR/$RED/\" \
+            -e \"/Up/s/STATUSCOLOR/$GREEN/\" \
+            -e \"/Created/s/STATUSCOLOR/$YELLOW/\" \
+            -e \"s/EXPOSECOLOR/$BLUE/g\" \
+            -e \"s/BOLDCOLOR/$WHITEBOLD_RE/g\" "
+
+
+
 RUNNING_CONTAINER=$(docker container list -a |grep Up|wc -l)
 EXITED_CONTAINER=$(docker container list -a |grep Exited|wc -l)
 CREATED_CONTAINER=$(docker container list -a |grep Created|wc -l)
@@ -64,13 +80,17 @@ DOCKER=($(eval ${DOCKER_SET} 2>/dev/null))
 unset IFS
 
 NumberC=$(docker container ls -a |wc -l)
-CONTAINER_INDEX=${#DOCKER[@]} 
+CONTAINER_INDEX=${#DOCKER[@]}
+
 SN=$(( `tput lines` - 1 ))
 CN=$(tput cols)
 LINE_USED=$(( $CONTAINER_INDEX < $((SN -1)) ? $CONTAINER_INDEX : $((SN -1))))
 OFFSET=0 
 
 echo -e "containers:${WHITE_BOLD} $LINE_USED ${OFF}, running:${WHITE_BOLD} $RUNNING_CONTAINER${OFF}, exited:${WHITE_BOLD} $EXITED_CONTAINER ${OFF}, created:${WHITE_BOLD} $CREATED_CONTAINER ${OFF}\n"
+echo -e "$WHITE_BOLD −−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−\n \
+CONTAINER ID − IMAGE              (CREATED)        STATUS                           PORTS                    <NAMES>\n \
+−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−−"
 
 if command -v lesskey &> /dev/null; then
     LESSKEY=true
@@ -81,6 +101,7 @@ esac
 
 for elt in "${DOCKER[@]}"
 do
+    
     ELT="$(echo "$elt" | $SED_CMD)"
     CONTAINER_UNCOL+=("$ELT")
 done
@@ -95,18 +116,19 @@ done
 if [[ $LESSKEY = true ]]; then
     echo "\t quit" | lesskey -o /tmp/lsh_less_keys_tmp -- - &> /dev/null
 fi
-
 function get_containers() {
     ELT="$(echo "${CONTAINER_UNCOL[$CURRENT_POS-1]}")"
-    CONTAINER_HASH=${ELT:0:7}
-    INSPECT_DOCKER="docker container inspect $CONTAINER_HASH"
-#                    --format \"table IpAdress   : {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}\n\
+    #extract hash_container started from 8 - 10 characters
+    CONTAINER_HASH=${ELT:8:10}
+#    INSPECT_DOCKER="docker container inspect $CONTAINER_HASH"
+#                    --format \"table IpAdress   : {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}\n      \
 #                               MacAdress  : {{range .NetworkSettings.Networks}}{{.MacAddress}}{{end}} \n    \
 #                               PathLog    : {{.LogPath}}\n                                                  \
 #                               ImageName  : {{.Config.Image}} \n                                            \
 #                               StartedAt  : {{.State.StartedAt}}\n                                          \
 #                               FinishedAt : {{.State.FinishedAt}}\n                                         \
 #                               Status     : {{.State.Status}}\" "
+    INSPECT_DOCKER="docker container diff $CONTAINER_HASH"
     CONTAINER=$(eval ${INSPECT_DOCKER} 2>/dev/null)
     tmp_diff="$(echo "$CONTAINER" | $SED_CMD)"
     off=$(echo "$tmp_diff" | grep -c ".\{$CN\}")
