@@ -15,5 +15,4 @@ after_success: |
   git clone https://github.com/anouarbensaad/docker-containerviewer
   cd docker-containerviewer
   chmod +x docker-viewer.sh
-  alias docker-viewer='./docker-viewer.sh'
-  docker-viewer
+  ./docker-viewer.sh
