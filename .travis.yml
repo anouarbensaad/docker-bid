@@ -1,4 +1,4 @@
-language: generic
+language: bash
 
 os:
 - linux
@@ -10,11 +10,5 @@ addons:
     package:
       - docker
       - git
-      - xdotool
-
-after_success: |
-  git clone https://github.com/anouarbensaad/docker-containerviewer
-  cd docker-containerviewer
-  chmod +x docker-viewer.sh
-  ./docker-viewer.sh
-  xdotool key ctrl+c
+script:
+  - bash docker-viewer.sh
