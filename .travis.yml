@@ -7,8 +7,11 @@ sudo: required
 
 addons:
   apt:
-    package:
-      - docker
-      - git
+    packages:
+      - docker-ce
+
+services:
+  - docker
+
 script:
   - bash docker-viewer.sh
