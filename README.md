@@ -1,4 +1,5 @@
-# docker-statusview
+# docker-bid
+
 docker-containerviewer - is a simple tool that allows you to easily interact with your containers.
 
 
