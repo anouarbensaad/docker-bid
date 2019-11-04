@@ -180,7 +180,7 @@ set_containers() {
     fi
 }
 
-calculate_offset {
+check_offset() {
     tmp=1
     idx=$(( idx -1 ))
     while [[ $tmp -lt $SN ]]
@@ -219,7 +219,7 @@ do
 	if [[ $offset != 0 ]]; then 
    	    [[ $current_position -lt $((SN -1)) ]] && offset_2=0
    	    ext=1
-   	    calculate_offset
+   	    check_offset
 	fi
 	end_idx=$(( line_used + idx -1 + ext - offset_2 ))
     fi
